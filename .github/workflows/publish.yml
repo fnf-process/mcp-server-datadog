@@ -12,6 +12,9 @@ on:
 
 jobs:
   publish:
+    # F&F 포크 가드: 이 워크플로는 원본(winor30) 의 npm 발행용이다. 포크에서 v*.*.* 태그
+    # (예: v1.8.0-fnf.1) 를 올릴 때 돌지 않게 막는다. 원본 소유자 레포에서만 실행된다.
+    if: github.repository_owner == 'winor30'
     runs-on: ubuntu-latest
 
     permissions:
