@@ -1,3 +1,34 @@
+# F&F 운영용 포크
+
+원본 [winor30/mcp-server-datadog](https://github.com/winor30/mcp-server-datadog) (Apache-2.0) 의 F&F 운영 포크다. Orbit(mcp-orch)의 `datadog-mcp` 서버는 npm 게시본(`@winor30/mcp-server-datadog`) 대신 **이 레포의 릴리스 태그**를 설치한다.
+
+- **배포 브랜치**: `release/fnf` (실행에 필요한 `build/` 를 커밋해 둔 브랜치). `main` 은 upstream 추적용이라 `build/` 가 없어 git 으로 설치하면 실행되지 않는다.
+- **태그 규칙**: `v<원본 버전>-fnf.<N>` (예: `v1.8.0-fnf.1`). 한 번 올린 태그는 지우거나 옮기지 않는다 (pod 재기동 때 같은 태그를 다시 받는다).
+- **v1.8.0-fnf.1 의 기준**: upstream `main` 0fd0fd4. npm 1.8.0 게시본에는 없는 의존성 취약점 수정(MCP SDK 1.32.1 등)이 들어 있다.
+- **Orbit 설정**: `"command": "npx"`, `"args": ["-y", "github:fnf-process/mcp-server-datadog#v1.8.0-fnf.1"]` (wrapper 의 `preinstall_mcp_servers.py` 가 `git+https://github.com/...` 로 바꿔 `npm install` 한다). `DATADOG_API_KEY`, `DATADOG_APP_KEY`, `DATADOG_SITE` 는 기존대로 env 로 준다.
+- **원본 npm 발행 워크플로는 막아 두었다**: `publish.yml` 은 `v*.*.*` 태그에 반응하므로 `repository_owner == 'winor30'` 가드를 걸었다. 이 포크에서 Release 를 만들거나 npm 발행을 시도하지 않는다.
+
+## 갱신 절차 (upstream 머지 → build → 태그)
+
+```bash
+# 1. upstream 을 main 에 반영 (최초 1회: git remote add upstream https://github.com/winor30/mcp-server-datadog.git)
+git fetch upstream && git checkout main && git merge upstream/main   # README 충돌 시 이 F&F 블록은 유지
+
+# 2. release/fnf 에 main 을 병합하고 package.json 의 version 을 <원본 버전>-fnf.<N> 으로 올린다
+git checkout release/fnf && git merge main
+pnpm install --frozen-lockfile --ignore-scripts && pnpm test && pnpm build
+git add -A && git commit -m "build: v<원본 버전>-fnf.<N>"
+
+# 3. 태그와 푸시
+git tag v<원본 버전>-fnf.<N> && git push origin release/fnf v<원본 버전>-fnf.<N>
+
+# 4. Orbit datadog-mcp 의 args 태그를 바꿔 재배포 (옛 태그는 롤백용으로 남긴다)
+```
+
+`release/fnf` 가 `main` 과 다른 점은 세 가지뿐이다: `package.json` 의 `version` 과 `prepare`(husky) 제거, `.gitignore` 끝의 `!build/`, 그리고 `build/`. `prepare` 를 남기면 npm 이 git 설치 때 devDependencies 수백 개를 받아 `husky` 를 돌려 시작이 느려진다.
+
+---
+
 # Datadog MCP Server
 
 > **DISCLAIMER**: This is a community-maintained project and is not officially affiliated with, endorsed by, or supported by Datadog, Inc. This MCP server utilizes the Datadog API but is developed independently as part of the [Model Context Protocol](https://github.com/modelcontextprotocol/servers) ecosystem.
