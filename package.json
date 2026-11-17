@@ -1,6 +1,6 @@
 {
   "name": "@winor30/mcp-server-datadog",
-  "version": "1.8.0",
+  "version": "1.8.0-fnf.1",
   "description": "MCP server for interacting with Datadog API",
   "repository": {
     "type": "git",
@@ -24,7 +24,6 @@
   },
   "scripts": {
     "build": "tsup &&  node -e \"require('fs').chmodSync('build/index.js', '755')\"",
-    "prepare": "husky",
     "watch": "tsup --watch",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js",
     "lint": "eslint . --ext .ts,.js --fix",

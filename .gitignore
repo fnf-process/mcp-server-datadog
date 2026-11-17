@@ -127,3 +127,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# F&F release/fnf: git 설치용으로 빌드 결과를 커밋한다 (README 상단 "F&F 운영용 포크" 참고)
+!build/
